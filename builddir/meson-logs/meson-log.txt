@@ -1,0 +1,21 @@
+Build started at 2018-06-21T18:58:57.540831
+Main binary: /usr/bin/python3
+Python system: Linux
+The Meson build system
+Version: 0.45.1
+Source dir: /home/paulocanedo/Development/gnome-builder/opengl_2
+Build dir: /home/paulocanedo/Development/gnome-builder/opengl_2/builddir
+Build type: native build
+Project name: opengl_2
+Native C compiler: cc (gcc 7.3.0 "cc (Ubuntu 7.3.0-16ubuntu3) 7.3.0")
+Native C++ compiler: c++ (gcc 7.3.0 "c++ (Ubuntu 7.3.0-16ubuntu3) 7.3.0")
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Dependency glfw3 found: YES (cached)
+Dependency GL found: YES (cached)
+Dependency x11 found: YES (cached)
+Dependency threads found: YES (cached)
+Dependency xrandr found: YES (cached)
+Dependency xi found: YES (cached)
+Build targets in project: 1
+Found ninja-1.8.2 at /usr/bin/ninja
