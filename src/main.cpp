@@ -7,6 +7,9 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+float objTx = 0.0f;
+float objTy = 0.0f;
+
 int main()
 {
     // glfw: initialize and configure
@@ -47,18 +50,13 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-         -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, //inferior esquerdo
-         -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, //superior esquerdo
-          0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //inferior direito
-          0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //inferior direito
-         -0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //superior esquerdo
-          0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  //superior direito
+         0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, //inferior esquerdo
+         0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, //superior esquerdo
+         1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //inferior direito
+         1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, //inferior direito
+         0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, //superior esquerdo
+         1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f  //superior direito
     };
-    /*float vertices[] = {
-         0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-         0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f  // top
-    };*/
     GLuint VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -117,10 +115,16 @@ int main()
     //glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(imagem);
 
+    shader.use();
+
     //trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
 //    trans = glm::scale(trans, glm::vec3(0.5, 0.5, 1.0));
 //    trans = glm::translate(trans, glm::vec3(0.5, 0.0, 0.0));
-
+    glm::mat4 viewProjection = glm::ortho(0.0f, 100.0f * SCR_WIDTH / SCR_HEIGHT,
+                                          0.0f, 100.0f,
+                                          -1.0f, 1.0f);
+    //glm::mat4 viewProjection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -1.0f, 1.0f);
+    shader.setMat4("viewProjection", viewProjection);
 
     // render loop
     // -----------
@@ -129,6 +133,7 @@ int main()
         // input
         // -----
         processInput(window);
+        float time = (float)glfwGetTime();
 
         // render
         // ------
@@ -141,18 +146,20 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        float time = (float)glfwGetTime();
-        glm::mat4 trans(1.0f);
-        trans = glm::scale(trans, glm::vec3(0.2, 0.2, 1.0));
-        trans = glm::rotate(trans, -time, glm::vec3(0.0, 0.0, 1.0));
-        trans = glm::translate(trans, glm::vec3(0.3, 0.3, 0.0));
+
+        glm::mat4 model(1.0f);
+        //model = glm::rotate(model, 3.14f / 3, glm::vec3(0.0, 0.0, 1.0));
+        model = glm::translate(model, glm::vec3(objTx, objTy, 0.0));
+        model = glm::scale(model, glm::vec3(20.0f, 20.0f, 1.0));
+
         //trans = glm::scale(trans, glm::vec3(abs(sin(time)), abs(sin(time)), 1.0));
 
+        shader.setMat4("model", model);
+
         // render the triangle
-        shader.use();
         shader.setInt("ourTexture1", 0);
         shader.setInt("ourTexture2", 1);
-        shader.setMat4("trans", trans);
+        shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -178,6 +185,19 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    float deslocamento = 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        objTx += deslocamento;
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        objTx -= deslocamento;
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        objTy += deslocamento;
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        objTy -= deslocamento;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
